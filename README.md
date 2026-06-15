@@ -1,7 +1,7 @@
 # OmniVideo-100K: A Dataset for Audio-Visual Reasoning through Structured Scripts and Evidence Chains
 
 [![Project Page](https://img.shields.io/badge/Project-Page-orange)](https://yzlmhzz.github.io/OmniVideo-100K/)
-[![Paper](https://img.shields.io/badge/arXiv-Paper-red.svg)](https://github.com/MiG-NJU/OmniVideo-100K)
+[![Paper](https://img.shields.io/badge/arXiv-Paper-red.svg)](https://arxiv.org/abs/2606.14702)
 [![Dataset](https://img.shields.io/badge/Dataset-OmniVideo--100K-blue)](https://huggingface.co/datasets/MiG-NJU/OmniVideo-100K)
 [![Dataset](https://img.shields.io/badge/Dataset-OmniVideo--Test-blue)](https://huggingface.co/datasets/MiG-NJU/OmniVideo-Test)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
