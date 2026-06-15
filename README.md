@@ -26,6 +26,14 @@ Current "video-caption-QA" pipelines often suffer from modality bias, temporal m
 
 ---
 
+## 📈 Performance on Existing Benchmarks
+
+Models fine-tuned on OmniVideo-100K achieve consistent performance gains across external audio-visual benchmarks (e.g., Daily-Omni, JointAVBench) while preserving their original capabilities on general video benchmarks like Video-MME.
+
+![Benchmarks](assets/benchmarks.png)
+
+---
+
 ## 📚 Dataset: OmniVideo-100K & OmniVideo-Test
 
 Our datasets are designed based on a comprehensive cognitive framework covering 10 tasks across three levels:
