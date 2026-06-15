@@ -183,7 +183,7 @@ If you find our data or pipeline useful for your research, please consider citin
 @article{cai2026omnivideo100k,
   title={OmniVideo-100K: A Dataset for Audio-Visual Reasoning through Structured Scripts and Evidence Chains},
   author={Cai, Xinyue and Fu, Chaoyou and Zhang, Yi-Fan and He, Ran and Shan, Caifeng},
-  journal={arXiv preprint arXiv:26xx.xxxxx},
+  journal={arXiv preprint arXiv:2606.14702},
   year={2026}
 }
 ```
