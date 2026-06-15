@@ -1,0 +1,1 @@
+python 0_seprate_av.py --root_path <root_path> --num_processes 4 --target_fps 1 --target_max_dim 480
