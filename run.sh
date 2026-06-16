@@ -32,7 +32,7 @@ export QA_NUM="${QA_NUM:-2}"
 export PYTHONPATH="$REPO_ROOT/repro/vendor:${PYTHONPATH:-}"
 export PYTHONUNBUFFERED=1
 
-CROSS_TASKS=(causal_reasoning comparison summarization)
+CROSS_TASKS=(causal_reasoning comparison summarization sentiment_analysis event_sequence_ordering future_prediction hypothetical_reasoning)
 
 # --- system deps: ffmpeg + ffprobe -------------------------------------------
 if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
