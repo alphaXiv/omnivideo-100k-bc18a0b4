@@ -19,9 +19,7 @@ Current "video-caption-QA" pipelines often suffer from modality bias, temporal m
 1. **Entity-Anchored Video Scripting**: Transforms raw videos into structured, script-like text (summaries, main entity lists, and segment-wise audio-visual descriptions with timestamps), ensuring cross-segment referential consistency and sound-source associations.
 2. **Clue-Guided QA Generation**: Prompts MLLMs to first mine cross-segment and cross-modal clues from the script, and subsequently generate complex QA pairs featuring long-term temporal spans and deep cross-modal dependencies.
 
-<p align="center">
-  <img src="docs/images/pipeline.png" alt="Framework Overview" width="90%"/>
-</p>
+![pipeline](assets/pipeline.png)
 
 
 ---
@@ -30,7 +28,7 @@ Current "video-caption-QA" pipelines often suffer from modality bias, temporal m
 
 Models fine-tuned on OmniVideo-100K achieve consistent performance gains across external audio-visual benchmarks (e.g., Daily-Omni, JointAVBench) while preserving their original capabilities on general video benchmarks like Video-MME.
 
-![Benchmarks](assets/benchmarks.png)
+![benchmarks](assets/benchmarks.png)
 
 ---
 
@@ -169,16 +167,7 @@ python evaluation.py \
 
 Fine-tuning on OmniVideo-100K yields significant improvements across Alignment, Understanding, and Reasoning tasks.
 
-| Models                  | Size |        Overall        | Alignment | Understanding | Reasoning | (0, 2]min | (2, 5]min |
-| :---------------------- | :--: | :-------------------: | :-------: | :-----------: | :-------: | :-------: | :-------: |
-| Human                   |  -   |      **100.0%**       |     -     |       -       |     -     |     -     |     -     |
-| Gemini-3.1-Pro          |  -   |        83.96%         |  83.62%   |    84.50%     |  83.21%   |  82.61%   |  84.59%   |
-| VITA-1.5                |  8B  |        40.99%         |  28.45%   |    43.02%     |  48.09%   |  44.72%   |  39.24%   |
-| Qwen2.5-Omni            |  7B  |        42.77%         |  39.66%   |    46.51%     |  38.17%   |  38.51%   |  44.77%   |
-| Qwen3-Omni              | 30B  |        49.70%         |  43.10%   |    55.04%     |  45.04%   |  49.07%   |  50.00%   |
-| **Ours (VITA-1.5)**     |  8B  | **61.58%** _(+20.59)_ |  59.48%   |    63.18%     |  60.31%   |  59.01%   |  62.79%   |
-| **Ours (Qwen2.5-Omni)** |  7B  | **60.59%** _(+17.82)_ |  62.93%   |    62.40%     |  54.96%   |  54.66%   |  63.37%   |
-| **Ours (Qwen3-Omni)**   | 30B  | **63.56%** _(+13.86)_ |  60.34%   |    67.05%     |  59.54%   |  62.11%   |  64.24%   |
+![omnivideo-test](assets/omnivideo-test.png)
 
 
 ---
