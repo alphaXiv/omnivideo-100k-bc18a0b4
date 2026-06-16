@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import json
 import asyncio
@@ -92,21 +93,37 @@ async def process_single_video_concurrent(item, root_path, clients, semaphore, f
             try:
                 run_start = time.time()
 
-                response = await call_api(client, audio_bytes, os.path.splitext(audio_path)[1].lstrip("."),
-                                        prompt, timeout=TIMEOUT_LIMIT)
-                if not response:
-                    print("[TIMEOUT] API call exceeded timeout:", TIMEOUT_LIMIT)
-                    continue
+                response = None
+                parsed = False
+                for _ in range(3):
+                    response = await call_api(client, audio_bytes, os.path.splitext(audio_path)[1].lstrip("."),
+                                            prompt, timeout=TIMEOUT_LIMIT)
+                    if not response:
+                        print("[TIMEOUT] API call exceeded timeout:", TIMEOUT_LIMIT)
+                        break
 
-                transcribe_res = response.text
-                if transcribe_res.startswith("```json"):
-                    transcribe_res = transcribe_res.removeprefix("```json")
-                if transcribe_res.endswith("```"):
-                    transcribe_res = transcribe_res.removesuffix("```")
-                if transcribe_res != "None":
-                    item["transcribe"] = json.loads(transcribe_res)
-                else:
-                    item["transcribe"] = None
+                    transcribe_res = response.text
+                    if transcribe_res.startswith("```json"):
+                        transcribe_res = transcribe_res.removeprefix("```json")
+                    if transcribe_res.endswith("```"):
+                        transcribe_res = transcribe_res.removesuffix("```")
+                    if transcribe_res != "None":
+                        transcribe_res = re.sub(r',(\s*[}\]])', r'\1', transcribe_res)
+                        try:
+                            item["transcribe"] = json.loads(transcribe_res)
+                        except json.JSONDecodeError as e:
+                            print(f"[Retry]: JSONDecodeError on {video_id} {e}, retrying same client")
+                            continue
+                    else:
+                        item["transcribe"] = None
+                    parsed = True
+                    break
+
+                if not response:
+                    continue
+                if not parsed:
+                    print(f"[Retry]: JSONDecodeError on {video_id} exhausted same-client retries")
+                    continue
                 # print(item["transcribe"])
                 
                 run_end = time.time()
