@@ -1,0 +1,4 @@
+omni_data/
+*.pyc
+__pycache__/
+.venv/
