@@ -106,15 +106,16 @@ def main():
             segs = get_segments_description(item)
             prompt = DIRECT_PROMPT.format(TASK=task_pretty, VIDEO_SUMMARY=item["video_summary"].strip(),
                                           MAIN_ENTITIES=ents.strip(), SEGMENTS=segs.strip())
-            try:
-                resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
-                text = resp.text
-            except Exception as e:  # noqa: BLE001
-                print(f"[FAILED] {item['id']} {args.task}: {e}")
-                continue
-            f.write(json.dumps({"id": item["id"], "task": args.task, "direct_text": text}) + "\n")
-            f.flush()
-            print(f"[SUCESS] direct {args.task} {item['id']}")
+            for _ in range(int(os.environ.get("QA_NUM", 2))):
+                try:
+                    resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+                    text = resp.text
+                except Exception as e:  # noqa: BLE001
+                    print(f"[FAILED] {item['id']} {args.task}: {e}")
+                    continue
+                f.write(json.dumps({"id": item["id"], "task": args.task, "direct_text": text}) + "\n")
+                f.flush()
+                print(f"[SUCESS] direct {args.task} {item['id']}")
 
 
 if __name__ == "__main__":
