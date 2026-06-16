@@ -1,10 +1,10 @@
 """Fetch a couple of real OmniVideo-Test clips and write the
 `pre_files/final_videos_list.jsonl` that the data engine (step 0) consumes.
 
-These are genuine OmniVideo videos published with the paper
-(huggingface.co/datasets/MiG-NJU/OmniVideo-Test). They are multi-minute, so the
-Entity-Anchored scripting produces a multi-segment script and Clue-Guided QA
-generation has cross-segment material to mine."""
+This is a genuine OmniVideo video published with the paper
+(huggingface.co/datasets/MiG-NJU/OmniVideo-Test). It is multi-minute (~8 min),
+so the Entity-Anchored scripting produces a multi-segment script and
+Clue-Guided QA generation has cross-segment material to mine."""
 
 import os
 import json
@@ -15,10 +15,12 @@ ROOT = os.environ["ROOT_PATH"]
 HF = "https://huggingface.co/datasets/MiG-NJU/OmniVideo-Test/resolve/main/videos"
 
 # (id, source filename on HF). ids avoid a leading dash for shell/ffmpeg safety.
-# Two ~170s clips so the multi-segment scripts span a wide temporal range.
+# One ~8-minute summarization clip: with max_seg_length=15 the achievable
+# clue-guided span is bounded by the clip duration, so a multi-minute clip is
+# required to give clue-guided QA room to mine cross-segment material and to
+# make the paper's 144.75s span attainable in principle.
 CLIPS = [
-    ("sIlvsZag5fc_causal_reasoning_1", "sIlvsZag5fc_causal_reasoning_1.mp4"),
-    ("8aKv3bgeVMs_comparison_0", "8aKv3bgeVMs_comparison_0.mp4"),
+    ("Gt3dV5yc__4_summarization_1", "Gt3dV5yc__4_summarization_1.mp4"),
 ]
 
 
