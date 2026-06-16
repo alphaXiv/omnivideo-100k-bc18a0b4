@@ -15,10 +15,16 @@ ROOT = os.environ["ROOT_PATH"]
 HF = "https://huggingface.co/datasets/MiG-NJU/OmniVideo-Test/resolve/main/videos"
 
 # (id, source filename on HF). ids avoid a leading dash for shell/ffmpeg safety.
-# Two ~170s clips so the multi-segment scripts span a wide temporal range.
+# Five multi-minute clips covering all three cross-segment tasks the engine runs
+# (causal_reasoning, comparison, summarization), each present at least once.
+# More videos (and at least one longer clip per task) average out per-video
+# variance in the clue-guided-vs-direct span comparison.
 CLIPS = [
     ("sIlvsZag5fc_causal_reasoning_1", "sIlvsZag5fc_causal_reasoning_1.mp4"),
+    ("7nYHHgLj4M8_causal_reasoning_0", "7nYHHgLj4M8_causal_reasoning_0.mp4"),
     ("8aKv3bgeVMs_comparison_0", "8aKv3bgeVMs_comparison_0.mp4"),
+    ("LFnCcYAyB9s_comparison_0", "LFnCcYAyB9s_comparison_0.mp4"),
+    ("0COmvK458s0_summarization_0", "0COmvK458s0_summarization_0.mp4"),
 ]
 
 
