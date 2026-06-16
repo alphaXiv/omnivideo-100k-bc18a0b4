@@ -43,8 +43,10 @@ Detailed Script:
 # Output Format (strict)
 Q: [the question, in natural language, no timestamps]
 A: [the answer, in natural language, no timestamps]
-USED_SEGMENTS: [comma-separated list of the segment time ranges you actually
-used to write this Q&A, each exactly as "MM:SS-MM:SS"]
+Relevant Segments:
+[Timestamp of the first relevant segment]
+[Timestamp of the second relevant segment]
+[Add all other relevant timestamps as needed]
 """.strip()
 
 

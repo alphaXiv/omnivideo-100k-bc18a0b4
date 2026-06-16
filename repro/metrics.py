@@ -69,7 +69,7 @@ def direct_spans():
             for line in f:
                 item = json.loads(line)
                 used = ""
-                m = re.search(r"USED_SEGMENTS:(.*)", item.get("direct_text", ""), re.DOTALL)
+                m = re.search(r"Relevant Segments:\s*(.*)", item.get("direct_text", ""), re.DOTALL)
                 if m:
                     used = m.group(1)
                 lo, hi, n = spans_from_text(used)
