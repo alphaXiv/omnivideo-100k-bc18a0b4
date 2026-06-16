@@ -14,12 +14,14 @@ The script format fed to the model is byte-identical to the engine's own
 `get_segments_description`, so the only variable is one-step vs two-step."""
 
 import os
+import re
 import json
 import argparse
 from google import genai
 
 API_KEY = os.environ["API_KEY"]
 MODEL_NAME = os.environ["MODEL_NAME"]
+QA_NUM = int(os.environ["QA_NUM"])
 
 DIRECT_PROMPT = """
 # Role
@@ -28,7 +30,8 @@ You are a multimodal video QA generator.
 # Task
 You are given a structured textual description of a video: a summary, a main
 entity list, and a timestamped segment-by-segment script. In a single step,
-directly generate one "{TASK}" question and its answer from this script.
+directly generate {N} independent "{TASK}" questions and their answers from
+this script.
 
 # Input
 Video Summary:
@@ -39,6 +42,8 @@ Detailed Script:
 {SEGMENTS}
 
 # Output Format (strict)
+Emit exactly {N} independent blocks, each in the following form and separated
+by a blank line. Do not number the blocks and do not add any preamble:
 Q: [the question, in natural language, no timestamps]
 A: [the answer, in natural language, no timestamps]
 USED_SEGMENTS: [comma-separated list of the segment time ranges you used to write
@@ -104,7 +109,8 @@ def main():
         for item in items:
             ents = "".join(f"- {e['entity']}: {e['description']}\n" for e in item["main_entities"])
             segs = get_segments_description(item)
-            prompt = DIRECT_PROMPT.format(TASK=task_pretty, VIDEO_SUMMARY=item["video_summary"].strip(),
+            prompt = DIRECT_PROMPT.format(N=QA_NUM, TASK=task_pretty,
+                                          VIDEO_SUMMARY=item["video_summary"].strip(),
                                           MAIN_ENTITIES=ents.strip(), SEGMENTS=segs.strip())
             try:
                 resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
@@ -112,9 +118,15 @@ def main():
             except Exception as e:  # noqa: BLE001
                 print(f"[FAILED] {item['id']} {args.task}: {e}")
                 continue
-            f.write(json.dumps({"id": item["id"], "task": args.task, "direct_text": text}) + "\n")
+            # Split the response into one record per Q/A/USED_SEGMENTS block.
+            blocks = [b.strip() for b in re.split(r"(?=^\s*Q:)", text or "", flags=re.MULTILINE)
+                      if "USED_SEGMENTS:" in b]
+            if not blocks:
+                blocks = [text]
+            for blk in blocks:
+                f.write(json.dumps({"id": item["id"], "task": args.task, "direct_text": blk}) + "\n")
             f.flush()
-            print(f"[SUCESS] direct {args.task} {item['id']}")
+            print(f"[SUCESS] direct {args.task} {item['id']} ({len(blocks)} blocks)")
 
 
 if __name__ == "__main__":

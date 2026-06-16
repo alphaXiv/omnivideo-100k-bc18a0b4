@@ -68,14 +68,11 @@ def direct_spans():
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 item = json.loads(line)
-                used = ""
-                m = re.search(r"USED_SEGMENTS:(.*)", item.get("direct_text", ""), re.DOTALL)
-                if m:
-                    used = m.group(1)
-                lo, hi, n = spans_from_text(used)
-                if lo is None:
-                    continue
-                rows.append({"task": task, "id": item["id"], "span": hi - lo, "n_ts": n})
+                for m in re.finditer(r"USED_SEGMENTS:([^\n]*)", item.get("direct_text", "")):
+                    lo, hi, n = spans_from_text(m.group(1))
+                    if lo is None:
+                        continue
+                    rows.append({"task": task, "id": item["id"], "span": hi - lo, "n_ts": n})
     return rows
 
 
