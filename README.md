@@ -1,3 +1,30 @@
+## Implementation notes
+
+This fork adds a minimal, CPU-only reproduction of the **data engine** (both
+mechanisms), run on real OmniVideo videos.
+
+```bash
+bash run.sh
+```
+
+What to expect: one CPU-only instance (8 vCPU), about 8 minutes, about $0.60. It
+fetches two OmniVideo-Test clips, runs `data_pipeline/gen_script/0..5` and
+`data_pipeline/gen_qa/generate_qa.py` unmodified, then a direct single-pass
+baseline, and scores both mechanisms into `EVAL.md`.
+
+- Both mechanisms reproduce: scripts have 14 segments per video with consistent
+  entities and speaker labels, and Clue-Guided QA links a 1.53x wider temporal
+  span than direct (paper 1.90x). Fine-tuning gains are not tested.
+- No Gemini key needed: `repro/vendor/google/genai` forwards `generate_content`
+  to OpenRouter (set `OPENROUTER_API_KEY`); video maps to `video_url`, audio to
+  `input_audio`.
+- `apt` ffmpeg fails on the CPU image; `run.sh` falls back to a static build.
+  The repo needs Python 3.12 (`uv` bootstraps it).
+- Repeat the OpenRouter URL in `BASEURL_POOL` for more retries; one malformed
+  JSON response otherwise drops a whole video.
+
+---
+
 # OmniVideo-100K: A Dataset for Audio-Visual Reasoning through Structured Scripts and Evidence Chains
 
 [![Project Page](https://img.shields.io/badge/Project-Page-orange)](https://yzlmhzz.github.io/OmniVideo-100K/)
