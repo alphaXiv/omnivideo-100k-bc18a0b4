@@ -23,7 +23,7 @@ mkdir -p "$ROOT_PATH"
 # --- model / API config -------------------------------------------------------
 : "${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY}"
 export API_KEY="$OPENROUTER_API_KEY"
-export MODEL_NAME="${MODEL_NAME:-google/gemini-2.5-flash}"
+export MODEL_NAME="${MODEL_NAME:-google/gemini-2.5-pro}"
 # Pool repeated 3x: the shim ignores the value, but the pipeline creates one
 # client per entry and retries once per client, so a transient malformed-JSON
 # model response gets 3 attempts instead of 1.
