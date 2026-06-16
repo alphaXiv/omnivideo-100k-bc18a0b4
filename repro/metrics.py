@@ -83,6 +83,55 @@ def avg(xs):
     return sum(xs) / len(xs) if xs else 0.0
 
 
+def _trunc(s, n=600):
+    s = " ".join((s or "").split())
+    return s if len(s) <= n else s[:n] + " ..."
+
+
+def write_examples(scripts):
+    """A short-line markdown sample of engine output (readable as a bounded text
+    artifact), so the script/QA quality is inspectable without the big jsonl."""
+    lines = ["# Sample engine output\n"]
+    for it in scripts[:1]:
+        lines.append(f"## Video `{it['id']}` ({it.get('duration')}s)\n")
+        lines.append("**Video summary:** " + _trunc(it.get("video_summary", ""), 500) + "\n")
+        lines.append("**Main entity list (cross-segment referential anchor):**\n")
+        for e in it.get("main_entities", []):
+            lines.append(f"- {e.get('entity')}: {_trunc(e.get('description',''), 160)}")
+        lines.append("")
+        for seg in it.get("segments", [])[:1]:
+            lines.append(f"**Example segment [{seg['start_time']} - {seg['end_time']}]:**\n")
+            for t in seg.get("transcription", [])[:3]:
+                lines.append(f"- AUDIO [{t.get('speaker')}]: {_trunc(t.get('text',''), 160)}")
+            for s in seg.get("non_speech", [])[:3]:
+                lines.append(f"- SOUND: {s.get('sound')}")
+            for v in seg.get("visual", [])[:1]:
+                lines.append("- VISUAL: " + _trunc(v.get("text", ""), 300))
+            lines.append("")
+
+    # example clue-guided QA (final content) and direct QA
+    for path in sorted(glob.glob(os.path.join(ROOT, "qa_files", "*_qa.jsonl")))[:1]:
+        task = os.path.basename(path).replace("_qa.jsonl", "")
+        with open(path, "r", encoding="utf-8") as f:
+            rows = [json.loads(x) for x in f]
+        for item in rows[:1]:
+            for grp in (item.get("qa") or [])[:1]:
+                if grp.get("content"):
+                    lines.append(f"## Example clue-guided QA ({task})\n")
+                    lines.append("Designated segments: " + _trunc(grp.get("designated_segments", ""), 200))
+                    lines.append("\n" + _trunc(grp["content"], 700) + "\n")
+    for path in sorted(glob.glob(os.path.join(ROOT, "qa_files", "direct_*.jsonl")))[:1]:
+        task = os.path.basename(path).replace("direct_", "").replace(".jsonl", "")
+        with open(path, "r", encoding="utf-8") as f:
+            rows = [json.loads(x) for x in f]
+        if rows:
+            lines.append(f"## Example direct single-pass QA ({task})\n")
+            lines.append(_trunc(rows[0].get("direct_text", ""), 700) + "\n")
+
+    with open(os.path.join(ART, "examples.md"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+
 def main():
     scripts = load_scripts()
 
@@ -153,6 +202,8 @@ def main():
         f.write(eval_md)
     with open(os.path.join(os.environ.get("REPO_ROOT", "."), "EVAL.md"), "w", encoding="utf-8") as f:
         f.write(eval_md)
+
+    write_examples(scripts)
 
     print(eval_md)
     print("[metrics] wrote artifacts to", ART)
