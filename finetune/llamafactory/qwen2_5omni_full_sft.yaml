@@ -1,8 +1,8 @@
 ### model
 model_name_or_path: Qwen/Qwen2.5-Omni-7B
 video_max_pixels: 200704
-video_fps: 1.0
-video_maxlen: 180
+video_fps: 2.0
+video_maxlen: 300
 use_audio_in_video: true
 trust_remote_code: true
 
