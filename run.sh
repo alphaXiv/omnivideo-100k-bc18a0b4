@@ -24,10 +24,11 @@ mkdir -p "$ROOT_PATH"
 : "${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY}"
 export API_KEY="$OPENROUTER_API_KEY"
 export MODEL_NAME="${MODEL_NAME:-google/gemini-2.5-flash}"
-# Pool repeated 3x: the shim ignores the value, but the pipeline creates one
+# Pool repeated 6x: the shim ignores the value, but the pipeline creates one
 # client per entry and retries once per client, so a transient malformed-JSON
-# model response gets 3 attempts instead of 1.
-export BASEURL_POOL="${BASEURL_POOL:-https://openrouter.ai/api/v1,https://openrouter.ai/api/v1,https://openrouter.ai/api/v1}"
+# model response (which otherwise drops a whole video) gets 6 attempts.
+_OR="https://openrouter.ai/api/v1"
+export BASEURL_POOL="${BASEURL_POOL:-$_OR,$_OR,$_OR,$_OR,$_OR,$_OR}"
 export CONCURRENCY_LIMIT="${CONCURRENCY_LIMIT:-4}"
 export TIMEOUT_LIMIT="${TIMEOUT_LIMIT:-600}"
 export OR_HTTP_TIMEOUT="${OR_HTTP_TIMEOUT:-600}"

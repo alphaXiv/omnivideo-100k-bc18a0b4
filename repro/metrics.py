@@ -109,17 +109,24 @@ def write_examples(scripts):
                 lines.append("- VISUAL: " + _trunc(v.get("text", ""), 300))
             lines.append("")
 
-    # example clue-guided QA (final content) and direct QA
-    for path in sorted(glob.glob(os.path.join(ROOT, "qa_files", "*_qa.jsonl")))[:1]:
+    # example clue-guided QA (final content): first non-empty across tasks
+    done_cg = False
+    for path in sorted(glob.glob(os.path.join(ROOT, "qa_files", "*_qa.jsonl"))):
+        if done_cg or os.path.basename(path).startswith("direct_"):
+            continue
         task = os.path.basename(path).replace("_qa.jsonl", "")
         with open(path, "r", encoding="utf-8") as f:
             rows = [json.loads(x) for x in f]
-        for item in rows[:1]:
-            for grp in (item.get("qa") or [])[:1]:
+        for item in rows:
+            for grp in (item.get("qa") or []):
                 if grp.get("content"):
                     lines.append(f"## Example clue-guided QA ({task})\n")
                     lines.append("Designated segments: " + _trunc(grp.get("designated_segments", ""), 200))
                     lines.append("\n" + _trunc(grp["content"], 700) + "\n")
+                    done_cg = True
+                    break
+            if done_cg:
+                break
     for path in sorted(glob.glob(os.path.join(ROOT, "qa_files", "direct_*.jsonl")))[:1]:
         task = os.path.basename(path).replace("direct_", "").replace(".jsonl", "")
         with open(path, "r", encoding="utf-8") as f:
