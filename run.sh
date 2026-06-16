@@ -77,7 +77,7 @@ python "$GS/2_1_label_speaker.py" --root_path "$ROOT_PATH"
 echo "=== 2_2: video summary ==="
 python "$GS/2_2_video_summary.py" --root_path "$ROOT_PATH"
 echo "=== 3: integrate segments ==="
-python "$GS/3_inte_seg.py" --root_path "$ROOT_PATH" --max_seg_length 15
+python "$GS/3_inte_seg.py" --root_path "$ROOT_PATH" --max_seg_length 8
 echo "=== 4: per-segment visual descriptions ==="
 python "$GS/4_seg_visual.py" --root_path "$ROOT_PATH" --num_chunks 2
 echo "=== 5: finalize script.jsonl ==="
