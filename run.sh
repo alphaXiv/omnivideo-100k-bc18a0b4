@@ -31,7 +31,7 @@ export BASEURL_POOL="${BASEURL_POOL:-https://openrouter.ai/api/v1,https://openro
 export CONCURRENCY_LIMIT="${CONCURRENCY_LIMIT:-4}"
 export TIMEOUT_LIMIT="${TIMEOUT_LIMIT:-600}"
 export OR_HTTP_TIMEOUT="${OR_HTTP_TIMEOUT:-600}"
-export QA_NUM="${QA_NUM:-2}"
+export QA_NUM="${QA_NUM:-5}"
 export PYTHONPATH="$REPO_ROOT/repro/vendor:${PYTHONPATH:-}"
 export PYTHONUNBUFFERED=1
 
