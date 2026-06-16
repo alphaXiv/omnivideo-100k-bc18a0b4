@@ -15,9 +15,10 @@ ROOT = os.environ["ROOT_PATH"]
 HF = "https://huggingface.co/datasets/MiG-NJU/OmniVideo-Test/resolve/main/videos"
 
 # (id, source filename on HF). ids avoid a leading dash for shell/ffmpeg safety.
+# Two ~170s clips so the multi-segment scripts span a wide temporal range.
 CLIPS = [
-    ("0suSuydr-ww_summarization_0", "0suSuydr-ww_summarization_0.mp4"),
-    ("3V78r1y2EHs_event_sequence_ordering_0", "3V78r1y2EHs_event_sequence_ordering_0.mp4"),
+    ("sIlvsZag5fc_causal_reasoning_1", "sIlvsZag5fc_causal_reasoning_1.mp4"),
+    ("8aKv3bgeVMs_comparison_0", "8aKv3bgeVMs_comparison_0.mp4"),
 ]
 
 

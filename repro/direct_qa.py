@@ -23,14 +23,12 @@ MODEL_NAME = os.environ["MODEL_NAME"]
 
 DIRECT_PROMPT = """
 # Role
-You are an expert multimodal video analyst.
+You are a multimodal video QA generator.
 
 # Task
 You are given a structured textual description of a video: a summary, a main
-entity list, and a timestamped segment-by-segment script with AUDIO and VISUAL
-content. In a single step, directly generate ONE challenging "{TASK}" question
-and its answer that requires synthesizing both audio and visual cues from the
-video.
+entity list, and a timestamped segment-by-segment script. In a single step,
+directly generate one "{TASK}" question and its answer from this script.
 
 # Input
 Video Summary:
@@ -43,8 +41,8 @@ Detailed Script:
 # Output Format (strict)
 Q: [the question, in natural language, no timestamps]
 A: [the answer, in natural language, no timestamps]
-USED_SEGMENTS: [comma-separated list of the segment time ranges you actually
-used to write this Q&A, each exactly as "MM:SS-MM:SS"]
+USED_SEGMENTS: [comma-separated list of the segment time ranges you used to write
+this Q&A, each exactly as "MM:SS-MM:SS"]
 """.strip()
 
 
