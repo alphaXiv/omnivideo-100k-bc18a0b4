@@ -5,8 +5,8 @@
 # Runs the released pipeline UNMODIFIED:
 #   data_pipeline/gen_script/0..5  -> Entity-Anchored Video Scripting -> script.jsonl
 #   data_pipeline/gen_qa/generate_qa.py -> Clue-Guided QA Generation
-# on two real OmniVideo-Test clips, then a direct single-pass QA baseline, and
-# scores the paper's two core mechanisms.
+# on 8 real OmniVideo-Test clips across all 7 cross-segment task types, then
+# a direct single-pass QA baseline, and scores the paper's two core mechanisms.
 #
 # The engine calls Gemini via google-genai. We have an OpenRouter key (not a
 # Gemini key), and OpenRouter serves Gemini with video+audio input, so
@@ -28,11 +28,11 @@ export BASEURL_POOL="${BASEURL_POOL:-https://openrouter.ai/api/v1}"  # shim igno
 export CONCURRENCY_LIMIT="${CONCURRENCY_LIMIT:-4}"
 export TIMEOUT_LIMIT="${TIMEOUT_LIMIT:-600}"
 export OR_HTTP_TIMEOUT="${OR_HTTP_TIMEOUT:-600}"
-export QA_NUM="${QA_NUM:-2}"
+export QA_NUM="${QA_NUM:-3}"
 export PYTHONPATH="$REPO_ROOT/repro/vendor:${PYTHONPATH:-}"
 export PYTHONUNBUFFERED=1
 
-CROSS_TASKS=(causal_reasoning comparison summarization)
+CROSS_TASKS=(causal_reasoning comparison summarization sentiment_analysis event_sequence_ordering future_prediction hypothetical_reasoning)
 
 # --- system deps: ffmpeg + ffprobe -------------------------------------------
 if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then

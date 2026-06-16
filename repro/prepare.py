@@ -15,9 +15,21 @@ ROOT = os.environ["ROOT_PATH"]
 HF = "https://huggingface.co/datasets/MiG-NJU/OmniVideo-Test/resolve/main/videos"
 
 # (id, source filename on HF). ids avoid a leading dash for shell/ffmpeg safety.
+# Eight real OmniVideo-Test clips covering a mix of the cross-segment task
+# taxonomy (summarization, event_sequence_ordering, causal_reasoning,
+# comparison, sentiment_analysis, future_prediction, hypothetical_reasoning).
+# The filename's task is just metadata from the OmniVideo-Test split: our
+# pipeline re-runs *all* CROSS_TASKS on every clip, so this just gives us
+# topically diverse multi-minute material.
 CLIPS = [
     ("0suSuydr-ww_summarization_0", "0suSuydr-ww_summarization_0.mp4"),
     ("3V78r1y2EHs_event_sequence_ordering_0", "3V78r1y2EHs_event_sequence_ordering_0.mp4"),
+    ("5M-oFRV5ZO4_causal_reasoning_0", "5M-oFRV5ZO4_causal_reasoning_0.mp4"),
+    ("1PE0kIQL26E_comparison_0", "1PE0kIQL26E_comparison_0.mp4"),
+    ("1ac7ygkdAnc_sentiment_analysis_0", "1ac7ygkdAnc_sentiment_analysis_0.mp4"),
+    ("0COmvK458s0_future_prediction_1", "0COmvK458s0_future_prediction_1.mp4"),
+    ("0n4KWvDu3oA_hypothetical_reasoning_1", "0n4KWvDu3oA_hypothetical_reasoning_1.mp4"),
+    ("73hxMlRpw2w_summarization_1", "73hxMlRpw2w_summarization_1.mp4"),
 ]
 
 
