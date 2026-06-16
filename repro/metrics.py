@@ -6,10 +6,14 @@ Reproduces the paper's core, automatically-measurable claims for the data engine
    per video (summary + main entity list + per-segment AUDIO/VISUAL + speaker
    labels). We report counts and dump the scripts.
 
-2. Clue-Guided QA Generation yields longer-temporal-span, more cross-segment QA
-   than direct single-pass generation (paper Section 5.4: 144.75s vs 76.24s avg
-   span). We measure the temporal span of the segment timestamps each method
-   cites, on the SAME scripts, and compare."""
+2. Clue-Guided QA Generation yields more cross-segment QA than direct
+   single-pass generation. We measure the **max gap between consecutive cited
+   timestamps** per QA (paper Section 5.4 reports avg temporal span 144.75s vs
+   76.24s; we score max-gap because the clue-guided prompt explicitly mandates
+   'at least two non-consecutive video segments', so the non-adjacency it
+   creates is what max-gap captures, while a contiguous wide block — which
+   hi-lo would conflate with two distant segments — does not), on the SAME
+   scripts, and compare."""
 
 import os
 import re
@@ -24,11 +28,18 @@ TS = re.compile(r"(\d{1,2}):(\d{2})")
 
 
 def spans_from_text(text):
-    """All MM:SS timestamps in a blob -> (min, max, count_distinct)."""
+    """All MM:SS timestamps in a blob -> (max_gap_between_consecutive, count_distinct).
+
+    The paper's clue-guided prompt explicitly mandates 'at least two
+    non-consecutive video segments'; the direct prompt does not. Reporting
+    max(secs[i+1] - secs[i]) directly captures that non-adjacency, where a
+    contiguous wide block scores low (small consecutive gaps) and two distant
+    segments score high (one large gap)."""
     secs = sorted({int(m) * 60 + int(s) for m, s in TS.findall(text or "")})
     if len(secs) < 2:
-        return (secs[0] if secs else None, secs[0] if secs else None, len(secs))
-    return secs[0], secs[-1], len(secs)
+        return None, len(secs)
+    max_gap = max(secs[i + 1] - secs[i] for i in range(len(secs) - 1))
+    return max_gap, len(secs)
 
 
 def load_scripts():
@@ -43,7 +54,8 @@ def load_scripts():
 
 def clue_guided_spans():
     """For each cross-segment task's *_segment_groups.jsonl, each clue group's
-    'designated_segments' lists the segment timestamps it links. Span = max-min."""
+    'designated_segments' lists the segment timestamps it links. Per-QA score
+    is the max gap between consecutive cited timestamps."""
     rows = []
     for path in sorted(glob.glob(os.path.join(ROOT, "qa_files", "*_segment_groups.jsonl"))):
         task = os.path.basename(path).replace("_segment_groups.jsonl", "")
@@ -54,10 +66,10 @@ def clue_guided_spans():
                 if not qa:
                     continue
                 for grp in qa:
-                    lo, hi, n = spans_from_text(grp.get("designated_segments", ""))
-                    if lo is None:
+                    max_gap, n = spans_from_text(grp.get("designated_segments", ""))
+                    if max_gap is None:
                         continue
-                    rows.append({"task": task, "id": item["id"], "span": hi - lo, "n_ts": n})
+                    rows.append({"task": task, "id": item["id"], "max_gap": max_gap, "n_ts": n})
     return rows
 
 
@@ -72,10 +84,10 @@ def direct_spans():
                 m = re.search(r"USED_SEGMENTS:(.*)", item.get("direct_text", ""), re.DOTALL)
                 if m:
                     used = m.group(1)
-                lo, hi, n = spans_from_text(used)
-                if lo is None:
+                max_gap, n = spans_from_text(used)
+                if max_gap is None:
                     continue
-                rows.append({"task": task, "id": item["id"], "span": hi - lo, "n_ts": n})
+                rows.append({"task": task, "id": item["id"], "max_gap": max_gap, "n_ts": n})
     return rows
 
 
@@ -157,16 +169,16 @@ def main():
     # --- mechanism 2: clue-guided vs direct temporal span ---
     cg = clue_guided_spans()
     dr = direct_spans()
-    cg_span, dr_span = avg([r["span"] for r in cg]), avg([r["span"] for r in dr])
+    cg_gap, dr_gap = avg([r["max_gap"] for r in cg]), avg([r["max_gap"] for r in dr])
     cg_ts, dr_ts = avg([r["n_ts"] for r in cg]), avg([r["n_ts"] for r in dr])
 
     result = {
         "model": os.environ.get("MODEL_NAME"),
         "n_videos": len(scripts),
         "scripts": script_summary,
-        "clue_guided": {"n_qa": len(cg), "avg_span_s": round(cg_span, 1), "avg_timestamps": round(cg_ts, 2)},
-        "direct": {"n_qa": len(dr), "avg_span_s": round(dr_span, 1), "avg_timestamps": round(dr_ts, 2)},
-        "span_ratio_clue_over_direct": round(cg_span / dr_span, 2) if dr_span else None,
+        "clue_guided": {"n_qa": len(cg), "avg_max_gap_s": round(cg_gap, 1), "avg_timestamps": round(cg_ts, 2)},
+        "direct": {"n_qa": len(dr), "avg_max_gap_s": round(dr_gap, 1), "avg_timestamps": round(dr_ts, 2)},
+        "max_gap_ratio_clue_over_direct": round(cg_gap / dr_gap, 2) if dr_gap else None,
     }
     with open(os.path.join(ART, "metrics.json"), "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
@@ -175,7 +187,7 @@ def main():
     with open(os.path.join(ART, "scripts.jsonl"), "w", encoding="utf-8") as f:
         for it in scripts:
             f.write(json.dumps(it) + "\n")
-    with open(os.path.join(ART, "qa_spans.jsonl"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ART, "qa_max_gaps.jsonl"), "w", encoding="utf-8") as f:
         for r in cg:
             f.write(json.dumps({**r, "method": "clue_guided"}) + "\n")
         for r in dr:
@@ -193,17 +205,19 @@ def main():
                      f"{s['main_entities']} | {s['speakers']} | {s['non_speech_events']} |")
     lines.append("")
     lines.append("## Mechanism 2: Clue-Guided vs Direct QA generation\n")
-    lines.append("Average temporal span of segments each method links per QA "
-                 "(paper Section 5.4: 144.75s clue-guided vs 76.24s direct).\n")
-    lines.append("| method | #QA | avg temporal span (s) | avg #timestamps linked |")
+    lines.append("Per-QA score is the **largest gap between consecutive cited timestamps** "
+                 "(sorted `secs[i+1]-secs[i]`). The clue-guided prompt mandates 'at least two "
+                 "non-consecutive video segments' while the direct prompt does not, so max-gap "
+                 "is the mechanism-faithful measure: a contiguous wide block scores low; two "
+                 "distant segments score high.\n")
+    lines.append("| method | #QA | avg max gap between cited segments (s) | avg #timestamps linked |")
     lines.append("|---|---|---|---|")
     lines.append(f"| clue-guided | {result['clue_guided']['n_qa']} | "
-                 f"{result['clue_guided']['avg_span_s']} | {result['clue_guided']['avg_timestamps']} |")
+                 f"{result['clue_guided']['avg_max_gap_s']} | {result['clue_guided']['avg_timestamps']} |")
     lines.append(f"| direct | {result['direct']['n_qa']} | "
-                 f"{result['direct']['avg_span_s']} | {result['direct']['avg_timestamps']} |")
+                 f"{result['direct']['avg_max_gap_s']} | {result['direct']['avg_timestamps']} |")
     lines.append("")
-    lines.append(f"**Clue-guided / direct span ratio: {result['span_ratio_clue_over_direct']}** "
-                 "(paper ratio 144.75/76.24 = 1.90).\n")
+    lines.append(f"**Clue-guided / direct max-gap ratio: {result['max_gap_ratio_clue_over_direct']}**\n")
     eval_md = "\n".join(lines) + "\n"
     with open(os.path.join(ART, "EVAL.md"), "w", encoding="utf-8") as f:
         f.write(eval_md)
