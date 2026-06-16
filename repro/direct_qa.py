@@ -41,8 +41,11 @@ Detailed Script:
 # Output Format (strict)
 Q: [the question, in natural language, no timestamps]
 A: [the answer, in natural language, no timestamps]
-USED_SEGMENTS: [comma-separated list of the segment time ranges you used to write
-this Q&A, each exactly as "MM:SS-MM:SS"]
+USED_SEGMENTS: [list at most two segment time ranges that contain the actual
+evidence strictly necessary to answer the question, each exactly as
+"MM:SS-MM:SS", comma-separated. Do NOT list segments you merely consulted for
+context, background, or disambiguation; only the 1-2 segments whose content the
+answer directly depends on.]
 """.strip()
 
 
