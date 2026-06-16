@@ -42,18 +42,25 @@ def load_scripts():
 
 
 def clue_guided_spans():
-    """For each cross-segment task's *_segment_groups.jsonl, each clue group's
-    'designated_segments' lists the segment timestamps it links. Span = max-min."""
+    """For each cross-segment task's *_qa.jsonl, each clue group's
+    'designated_segments' lists the segment timestamps it links. Span = max-min.
+
+    We restrict to groups whose `content` field is populated -- i.e., the
+    ~QA_NUM groups per video that the prompt_2 pass actually turned into a
+    final Q&A. Section 5.4 measures span on this finalized QA set, not on
+    every candidate group emitted by prompt_1's *_segment_groups.jsonl."""
     rows = []
-    for path in sorted(glob.glob(os.path.join(ROOT, "qa_files", "*_segment_groups.jsonl"))):
-        task = os.path.basename(path).replace("_segment_groups.jsonl", "")
+    for path in sorted(glob.glob(os.path.join(ROOT, "qa_files", "*_qa.jsonl"))):
+        task = os.path.basename(path).replace("_qa.jsonl", "")
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 item = json.loads(line)
                 qa = item.get("qa")
-                if not qa:
+                if not qa or not isinstance(qa, list):
                     continue
                 for grp in qa:
+                    if not grp.get("content"):
+                        continue
                     lo, hi, n = spans_from_text(grp.get("designated_segments", ""))
                     if lo is None:
                         continue
